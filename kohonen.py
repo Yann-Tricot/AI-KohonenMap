@@ -10,6 +10,8 @@
 # ------------------------------------------------------------------------
 # Pour que les divisions soient toutes réelles (pas de division entière)
 from __future__ import division
+from cmath import sqrt
+import math
 # Librairie de calcul matriciel
 import numpy
 # Librairie d'affichage
@@ -45,7 +47,8 @@ class Neuron:
     @type x: numpy array
     '''
     # TODO
-    self.y = None
+    self.y = numpy.linalg.norm(x - self.weights)
+
 
   def learn(self,eta,sigma,posxbmu,posybmu,x):
     '''
@@ -62,7 +65,7 @@ class Neuron:
     @type x: numpy array
     '''
     # TODO (attention à ne pas changer la partie à gauche du =)
-    self.weights[:] = numpy.random.random(self.weights.shape)
+    self.weights[:] += eta * numpy.exp(-(pow(abs(sqrt(pow(posxbmu - self.posx, 2) + pow(posybmu - self.posy, 2))), 2) / (pow(2 * sigma, 2)))) * (x - self.weights)
 
 
 class SOM:
@@ -264,18 +267,18 @@ if __name__ == '__main__':
   # Ensemble de données 1
   samples = numpy.random.random((nsamples,2,1))*2-1
   # Ensemble de données 2
-#  samples1 = -numpy.random.random((nsamples//3,2,1))
-#  samples2 = numpy.random.random((nsamples//3,2,1))
-#  samples2[:,0,:] -= 1
-#  samples3 = numpy.random.random((nsamples//3,2,1))
-#  samples3[:,1,:] -= 1
-#  samples = numpy.concatenate((samples1,samples2,samples3))
+  # samples1 = -numpy.random.random((nsamples//3,2,1))
+  # samples2 = numpy.random.random((nsamples//3,2,1))
+  # samples2[:,0,:] -= 1
+  # samples3 = numpy.random.random((nsamples//3,2,1))
+  # samples3[:,1,:] -= 1
+  # samples = numpy.concatenate((samples1,samples2,samples3))
   # Ensemble de données 3
-#  samples1 = numpy.random.random((nsamples//2,2,1))
-#  samples1[:,0,:] -= 1
-#  samples2 = numpy.random.random((nsamples//2,2,1))
-#  samples2[:,1,:] -= 1
-#  samples = numpy.concatenate((samples1,samples2))
+  # samples1 = numpy.random.random((nsamples//2,2,1))
+  # samples1[:,0,:] -= 1
+  # samples2 = numpy.random.random((nsamples//2,2,1))
+  # samples2[:,1,:] -= 1
+  # samples = numpy.concatenate((samples1,samples2))
   # Ensemble de données robotiques
 #  samples = numpy.random.random((nsamples,4,1))
 #  samples[:,0:2,:] *= numpy.pi
