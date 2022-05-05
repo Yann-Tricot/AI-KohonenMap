@@ -17,8 +17,6 @@ import numpy
 # Librairie d'affichage
 import matplotlib.pyplot as plt
 
-
-
 class Neuron:
   ''' Classe représentant un neurone '''
   
@@ -65,8 +63,11 @@ class Neuron:
     @type x: numpy array
     '''
     # TODO (attention à ne pas changer la partie à gauche du =)
-    self.weights[:] += eta * numpy.exp(-(pow(abs(sqrt(pow(posxbmu - self.posx, 2) + pow(posybmu - self.posy, 2))), 2) / (pow(2 * sigma, 2)))) * (x - self.weights)
-
+    self.weights[:] += eta * numpy.exp(-(pow(abs(sqrt(pow(posxbmu - self.posx, 2) + pow(posybmu - self.posy, 2))), 2) / (2 * (pow(sigma, 2))))) * (x - self.weights)
+    return abs(sum(self.weights))
+  
+  def getWeights(self, avgValue):
+    return avgValue - abs(sum(self.weights))
 
 class SOM:
   ''' Classe implémentant une carte de Kohonen. '''
@@ -128,13 +129,19 @@ class SOM:
     '''
     # Calcul du neurone vainqueur
     bmux,bmuy = numpy.unravel_index(numpy.argmin(self.activitymap),self.gridsize)
+    learningValue = 0
     # Mise à jour des poids de chaque neurone
     for posx in range(self.gridsize[0]):
       for posy in range(self.gridsize[1]):
-        self.map[posx][posy].learn(eta,sigma,bmux,bmuy,x)
+        learningValue += self.map[posx][posy].learn(eta,sigma,bmux,bmuy,x)
+    avgValue = learningValue / self.gridsize[0]
+    
+    difValue = 0
+    for posx in range(self.gridsize[0]):
+      for posy in range(self.gridsize[1]):
+        difValue += self.map[posx][posy].getWeights(avgValue)
 
-        
-      
+    return difValue
 
   def scatter_plot(self,interactive=False):
     '''
@@ -254,7 +261,7 @@ if __name__ == '__main__':
   # Largeur du voisinage
   SIGMA = 1.4
   # Nombre de pas de temps d'apprentissage
-  N = 30000
+  N = 50000
   # Affichage interactif de l'évolution du réseau 
   #TODO à mettre à faux pour que les simulations aillent plus vite
   VERBOSE = True
@@ -314,6 +321,7 @@ if __name__ == '__main__':
     # Affichage de la figure
     plt.show()
   # Boucle d'apprentissage
+  avgAutoOrga = 0
   for i in range(N+1):
     # Choix d'un exemple aléatoire pour l'entrée courante
     index = numpy.random.randint(nsamples)
@@ -321,7 +329,7 @@ if __name__ == '__main__':
     # Calcul de l'activité du réseau
     network.compute(x)
     # Modification des poids du réseau
-    network.learn(ETA,SIGMA,x)
+    avgAutoOrga += network.learn(ETA,SIGMA,x)
     # Mise à jour de l'affichage
     if VERBOSE and i%NAFFICHAGE==0:
       # Effacement du contenu de la figure
@@ -340,4 +348,5 @@ if __name__ == '__main__':
   network.plot()
   # Affichage de l'erreur de quantification vectorielle moyenne après apprentissage
   print("erreur de quantification vectorielle moyenne ",network.MSE(samples))
-
+  avgAutoOrga = avgAutoOrga / N
+  print("Moyenne de la mesure d'auto organisation ",avgAutoOrga)
