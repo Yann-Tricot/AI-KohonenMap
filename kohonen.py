@@ -272,7 +272,7 @@ if __name__ == '__main__':
   # TODO décommenter les données souhaitées
   nsamples = 1200
   # Ensemble de données 1
-  samples = numpy.random.random((nsamples,2,1))*2-1
+  # samples = numpy.random.random((nsamples,2,1))*2-1
   # Ensemble de données 2
   # samples1 = -numpy.random.random((nsamples//3,2,1))
   # samples2 = numpy.random.random((nsamples//3,2,1))
@@ -286,6 +286,14 @@ if __name__ == '__main__':
   # samples2 = numpy.random.random((nsamples//2,2,1))
   # samples2[:,1,:] -= 1
   # samples = numpy.concatenate((samples1,samples2))
+  # Ensemble de données 4
+  samples1 = -numpy.random.random((nsamples//12,2,1))
+  samples2 = numpy.random.random((nsamples//4,2,1))
+  samples2[:,0,:] -= 1
+  samples3 = numpy.random.random((nsamples//6,2,1))
+  samples3[:,1,:] -= 1
+  samples4 = numpy.random.random((nsamples//2,2,1))
+  samples = numpy.concatenate((samples1,samples2,samples3,samples4))
   # Ensemble de données robotiques
 #  samples = numpy.random.random((nsamples,4,1))
 #  samples[:,0:2,:] *= numpy.pi
