@@ -249,19 +249,76 @@ class SOM:
       s += numpy.min(self.activitymap)**2
     # On renvoie l'erreur de quantification vectorielle moyenne
     return s/nsamples
+  
+  def NPMO(self,teta1,teta2):
+    '''
+    @summary: calcul distance entre tous les neurones de la carte et teta pour récupérer le neurone le plus proche
+    '''
+    weights = numpy.array(self.weightsmap)
+    tetas = numpy.array((teta1 ,teta2))
+    n = numpy.resize(weights[1][1],(1,2))
+    xIndex = 1
+    yIndex = 1
+    minDistance = numpy.linalg.norm(tetas-n)
+
+    for i in range(weights.shape[0]):
+      for j in range(weights.shape[1]):
+        n = numpy.resize(weights[i][j],(1,2))
+        dist = numpy.linalg.norm(tetas-n)
+        if(dist < minDistance):
+            minDistance = dist
+            xIndex = i
+            yIndex = j
+
+    return weights[xIndex][yIndex]
+          
+  def PPMA(self,teta1,teta2):
+    neurone = self.NPMO(teta1,teta2)
+    print('Prédiction pos. main pour teta1 = ' + str(teta1) + ' teta2 = ' + str(teta2))
+    print('Pos. x1 = ' + str(neurone[2]))
+    print('Pos. x2 = ' + str(neurone[3]))
+    
+    
+  def NPMA(self,x1,x2):
+    '''
+    @summary: calcul la distance entre tous les neurones de la carte et teta pour récupérer le neurone le plus proche
+    '''
+    weights = numpy.array(self.weightsmap)
+    tetas = numpy.array((x1,x2))
+    n = numpy.array_split(weights[1][1], 2)
+    xIndex = 1
+    yIndex = 1
+    minDistance = numpy.linalg.norm(tetas-n)
+
+    for i in range(weights.shape[0]):
+      for j in range(weights.shape[1]):
+        n = numpy.array_split(weights[i][j], 2)
+        dist = numpy.linalg.norm(tetas-n)
+        if(dist < minDistance):
+            minDistance = dist
+            xIndex = i
+            yIndex = j
+
+    return weights[xIndex][yIndex]
+          
+  def PPMO(self,x1,x2):
+    neurone = self.NPMA(x1,x2)
+    print('Prédiction pos. motrice pour la valeur x1 = ' + str(x1) + ' x2 = ' + str(x2))
+    print('Pos. teta1 = ' + str(neurone[0]))
+    print('Pos. teta2 = ' + str(neurone[1]))
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
   # Création d'un réseau avec une entrée (2,1) et une carte (10,10)
   #TODO mettre à jour la taille des données d'entrée pour les données robotiques
-  network = SOM((2,1),(10,10))
+  network = SOM((4,1),(10,10))
   # PARAMÈTRES DU RÉSEAU
   # Taux d'apprentissage
   ETA = 0.05
   # Largeur du voisinage
   SIGMA = 1.4
   # Nombre de pas de temps d'apprentissage
-  N = 50000
+  N = 30000
   # Affichage interactif de l'évolution du réseau 
   #TODO à mettre à faux pour que les simulations aillent plus vite
   VERBOSE = True
@@ -287,35 +344,35 @@ if __name__ == '__main__':
   # samples2[:,1,:] -= 1
   # samples = numpy.concatenate((samples1,samples2))
   # Ensemble de données 4
-  samples1 = -numpy.random.random((nsamples//12,2,1))
-  samples2 = numpy.random.random((nsamples//4,2,1))
-  samples2[:,0,:] -= 1
-  samples3 = numpy.random.random((nsamples//6,2,1))
-  samples3[:,1,:] -= 1
-  samples4 = numpy.random.random((nsamples//2,2,1))
-  samples = numpy.concatenate((samples1,samples2,samples3,samples4))
+  # samples1 = -numpy.random.random((nsamples//12,2,1))
+  # samples2 = numpy.random.random((nsamples//4,2,1))
+  # samples2[:,0,:] -= 1
+  # samples3 = numpy.random.random((nsamples//6,2,1))
+  # samples3[:,1,:] -= 1
+  # samples4 = numpy.random.random((nsamples//2,2,1))
+  # samples = numpy.concatenate((samples1,samples2,samples3,samples4))
   # Ensemble de données robotiques
-#  samples = numpy.random.random((nsamples,4,1))
-#  samples[:,0:2,:] *= numpy.pi
-#  l1 = 0.7
-#  l2 = 0.3
-#  samples[:,2,:] = l1*numpy.cos(samples[:,0,:])+l2*numpy.cos(samples[:,0,:]+samples[:,1,:])
-#  samples[:,3,:] = l1*numpy.sin(samples[:,0,:])+l2*numpy.sin(samples[:,0,:]+samples[:,1,:])
+  samples = numpy.random.random((nsamples,4,1))
+  samples[:,0:2,:] *= numpy.pi
+  l1 = 0.7
+  l2 = 0.3
+  samples[:,2,:] = l1*numpy.cos(samples[:,0,:])+l2*numpy.cos(samples[:,0,:]+samples[:,1,:])
+  samples[:,3,:] = l1*numpy.sin(samples[:,0,:])+l2*numpy.sin(samples[:,0,:]+samples[:,1,:])
   # Affichage des données (pour les ensembles 1, 2 et 3)
+  # plt.figure()
+  # plt.scatter(samples[:,0,0], samples[:,1,0])
+  # plt.xlim(-1,1)
+  # plt.ylim(-1,1)
+  # plt.suptitle('Donnees apprentissage')
+  # plt.show()
+  # Affichage des données (pour l'ensemble robotique)
   plt.figure()
-  plt.scatter(samples[:,0,0], samples[:,1,0])
-  plt.xlim(-1,1)
-  plt.ylim(-1,1)
+  plt.subplot(1,2,1)
+  plt.scatter(samples[:,0,0].flatten(),samples[:,1,0].flatten(),c='k')
+  plt.subplot(1,2,2)
+  plt.scatter(samples[:,2,0].flatten(),samples[:,3,0].flatten(),c='k')
   plt.suptitle('Donnees apprentissage')
   plt.show()
-  # Affichage des données (pour l'ensemble robotique)
-#  plt.figure()
-#  plt.subplot(1,2,1)
-#  plt.scatter(samples[:,0,0].flatten(),samples[:,1,0].flatten(),c='k')
-#  plt.subplot(1,2,2)
-#  plt.scatter(samples[:,2,0].flatten(),samples[:,3,0].flatten(),c='k')
-#  plt.suptitle('Donnees apprentissage')
-#  plt.show()
     
   # SIMULATION
   # Affichage des poids du réseau
@@ -344,7 +401,7 @@ if __name__ == '__main__':
       plt.clf()
       # Remplissage de la figure
       # TODO à remplacer par scatter_plot_2 pour les données robotiques
-      network.scatter_plot(True)
+      network.scatter_plot_2(True)
       # Affichage du contenu de la figure
       plt.pause(0.00001)
       plt.draw()
@@ -358,3 +415,7 @@ if __name__ == '__main__':
   print("erreur de quantification vectorielle moyenne ",network.MSE(samples))
   avgAutoOrga = avgAutoOrga / N
   print("Moyenne de la mesure d'auto organisation ",avgAutoOrga)
+  # Récup. prédiction pos. main (teta1,theta2)
+  network.PPMA(0,0)
+  # Récup. prédiction pos. motrice (x1,x2)
+  network.PPMO(0,0)
